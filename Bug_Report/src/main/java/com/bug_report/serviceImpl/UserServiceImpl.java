@@ -16,21 +16,20 @@ import com.bug_report.util.MapObject;
 import com.bug_report.util.ValidateData;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 	@Autowired
 	UserRepository userRepository;
-	
-		
+
 	@Override
 	public Object addUser(UserDto user) {
-		UserEntity userEntity=null;
+		UserEntity userEntity = null;
 		if (!ObjectUtils.isEmpty(user)) {
-			 
-			 List<String> errors=ValidateData.validateUser(user);
-			 if (errors.isEmpty()) {
-				 userEntity = MapObject.userDtoToUserEntity(user);
-				 UserEntity existingUser;
-				 existingUser=userRepository.findByEmail(userEntity.getEmail());
+
+			List<String> errors = ValidateData.validateUser(user);
+			if (errors.isEmpty()) {
+				userEntity = MapObject.userDtoToUserEntity(user);
+				UserEntity existingUser;
+				existingUser = userRepository.findByEmail(userEntity.getEmail());
 				if (!ObjectUtils.isEmpty(existingUser)) {
 					return Arrays.asList("email already exist");
 				}
@@ -39,54 +38,50 @@ public class UserServiceImpl implements UserService{
 			} else {
 				return errors;
 			}
-		}
-		else {
+		} else {
 			System.out.println("Empty object");
 		}
 		return Arrays.asList("error in saving data...");
 	}
 
-
 	@Override
 	public List<UserDto> getAllUser() {
-		List<UserEntity> userEntities=userRepository.findAll();
-		List<UserDto> users=MapObject.userEntitysToUserDtos(userEntities);
+		List<UserEntity> userEntities = userRepository.findAll();
+		List<UserDto> users = MapObject.userEntitysToUserDtos(userEntities);
 		return users;
 	}
 
-
 	@Override
 	public Object getUserByEmpId(long empId) {
-		
-		if (StringUtils.isEmpty(""+empId)) {
+
+		if (StringUtils.isEmpty("" + empId)) {
 			return "Enter valid employee id";
 		}
-		UserEntity user=null;;
+		UserEntity user = null;
+		;
 		try {
-			user=userRepository.findById(empId).get();
-			
-			
+			user = userRepository.findById(empId).get();
+
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			return "Record not found..";
-			
+
 		}
 		return MapObject.userEntityToUserDto(user);
 	}
 
-
 	@Override
-	public Object updateByEmail(String email,UserDto userDto) {
+	public Object updateByEmail(String email, UserDto userDto) {
 		if (StringUtils.isBlank(email)) {
 			return "Enter valid email...";
 		}
-		UserEntity existringUser=userRepository.findByEmail(email);
+		UserEntity existringUser = userRepository.findByEmail(email);
 		if (ObjectUtils.isEmpty(existringUser)) {
 			return "User not found enter valid email...";
 		}
-		List<String> responseList=ValidateData.validateUser(userDto);
+		List<String> responseList = ValidateData.validateUser(userDto);
 		if (responseList.isEmpty()) {
-			UserEntity userEntity=(UserEntity) MapObject.mapObject(userDto, UserEntity.class);
+			UserEntity userEntity = (UserEntity) MapObject.mapObject(userDto, UserEntity.class);
 			existringUser.setFirstName(userEntity.getFirstName());
 			existringUser.setLastName(userEntity.getLastName());
 			existringUser.setUserRoleId(userEntity.getUserRoleId());
@@ -98,38 +93,56 @@ public class UserServiceImpl implements UserService{
 		} else {
 			return responseList;
 		}
-		
-	}
 
+	}
 
 	@Override
 	public Object updateByEmpId(long empid, UserDto userDto) {
-		if (ObjectUtils.isEmpty(empid)) {
-			return "Enter valid empid...";
-		}
-		UserEntity existringUser=null;
-		try {
-			existringUser=userRepository.findById(empid).get();
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		if (ObjectUtils.isEmpty(existringUser)) {
-			return "User not found enter valid empid...";
-		}
-		List<String> responseList=ValidateData.validateUser(userDto);
-		if (responseList.isEmpty()) {
-			UserEntity userEntity=(UserEntity) MapObject.mapObject(userDto, UserEntity.class);
-			existringUser.setFirstName(userEntity.getFirstName());
-			existringUser.setLastName(userEntity.getLastName());
-			existringUser.setUserRoleId(userEntity.getUserRoleId());
-			existringUser.setEmail(userEntity.getEmail());
-			existringUser.setPassword(userEntity.getPassword());
-			existringUser.setDepartment(userEntity.getDepartment());
-			userRepository.save(existringUser);
-			return null;
+		String messageString = null;
+
+		Object response = this.getUserByEmpId(empid);
+		if (response instanceof String) {
+			messageString = "User not found enter valid empid...";
 		} else {
-			return responseList;
+			
+				UserEntity existringUser = userRepository.findById(empid).get();
+				List<String> responseList = ValidateData.validateUser(userDto);
+				if (responseList.isEmpty()) {
+					UserEntity userEntity = (UserEntity) MapObject.mapObject(userDto, UserEntity.class);
+					existringUser.setFirstName(userEntity.getFirstName());
+					existringUser.setLastName(userEntity.getLastName());
+					existringUser.setUserRoleId(userEntity.getUserRoleId());
+					existringUser.setEmail(userEntity.getEmail());
+					existringUser.setPassword(userEntity.getPassword());
+					existringUser.setDepartment(userEntity.getDepartment());
+					userRepository.save(existringUser);
+
+				} else {
+					return responseList;
+				}
+			
 		}
+
+		return messageString;
 	}
-	
+
+	@Override
+	public String deleteByEmpId(long empid) {
+		String messageString = null;
+
+		try {
+			Object response = this.getUserByEmpId(empid);
+			if (response instanceof String) {
+				messageString = (String) response;
+			} else {
+				userRepository.deleteById(empid);
+			}
+
+		} catch (Exception e) {
+			e.getMessage();
+		}
+
+		return messageString;
+	}
+
 }

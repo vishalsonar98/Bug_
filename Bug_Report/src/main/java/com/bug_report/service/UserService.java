@@ -11,4 +11,5 @@ public interface UserService {
 	public Object getUserByEmpId(long empId);
 	public Object updateByEmail(String email,UserDto userDto);
 	public Object updateByEmpId(long empid, UserDto userDto);
+	public String deleteByEmpId(long empid);
 }

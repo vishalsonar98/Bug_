@@ -1,11 +1,14 @@
 package com.bug_report.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -81,11 +84,25 @@ public class AdminController<T> {
 	{
 		Object response=userService.updateByEmpId(empid, userDto);
 		
-		if (ObjectUtils.anyNull(response)) {
-			return new ResponseEntity<Object>("User updated successfully",HttpStatus.CREATED);
+		if (ObjectUtils.isEmpty(response)) {
+			return new ResponseEntity<Object>(Collections.singletonMap("Message", "User updated successfully"),HttpStatus.CREATED);
 		} else {
-			return new ResponseEntity<Object>(response,HttpStatus.FORBIDDEN);
+			return new ResponseEntity<Object>(Collections.singletonMap("Message", response),HttpStatus.NOT_FOUND);
 		}
 		
+	}
+	
+	@DeleteMapping("/user/empid/{empid}")
+	public ResponseEntity<Object> deleteUserByEmpId(@PathVariable("empid") long empId)
+	{
+		String response=userService.deleteByEmpId(empId);
+		
+		if (StringUtils.isBlank(response)) {
+			return new ResponseEntity<Object>(Collections.singletonMap("Message", "User Deleted Successfully..."),HttpStatus.OK);
+		}
+		else {
+			
+			return new ResponseEntity<Object>(Collections.singletonMap("Message", response),HttpStatus.NOT_FOUND);
+		}
 	}
 }
