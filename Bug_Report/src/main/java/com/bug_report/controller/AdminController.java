@@ -17,14 +17,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bug_report.dto.TeamDto;
 import com.bug_report.dto.UserDto;
+import com.bug_report.service.TeamService;
 import com.bug_report.service.UserService;
+
+import lombok.Data;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminController<T> {
 	@Autowired
-	UserService userService;
+	private UserService userService;
+	@Autowired
+	private TeamService teamService;
 	
 	@GetMapping("/")
 	public ResponseEntity<T> mapping()
@@ -32,8 +38,9 @@ public class AdminController<T> {
 		return ResponseEntity.notFound().build();
 	}
 	
+	/****************************User section*********************************/
 	@SuppressWarnings("unchecked")
-	@PostMapping("/user")
+	@PostMapping("/users")
 	public ResponseEntity<Object> addUser(@RequestBody UserDto user)
 	{
 		
@@ -104,5 +111,73 @@ public class AdminController<T> {
 			
 			return new ResponseEntity<Object>(Collections.singletonMap("Message", response),HttpStatus.NOT_FOUND);
 		}
+	}
+	
+	/****************************Team section*********************************/
+	@PostMapping("/teams")
+	public ResponseEntity<Object> addTeam(@RequestBody TeamDto teamDto)
+	{
+		ResponseEntity<Object> responseEntity;
+		String responseString=teamService.addTeam(teamDto);
+		if (StringUtils.isBlank(responseString)) {
+			responseEntity=new ResponseEntity<Object>(Collections.singletonMap("Message", "Team Created Successfully"),HttpStatus.CREATED);
+		}
+		else {
+			responseEntity=new ResponseEntity<Object>(Collections.singletonMap("Message", responseString),HttpStatus.BAD_REQUEST);
+		}
+		return responseEntity;
+	}
+	
+	@GetMapping("/teams")
+	public ResponseEntity<Object> getAllTeams()
+	{
+		ResponseEntity<Object> responseEntity;
+		
+		List<TeamDto> teamDtos=teamService.getAllTeams();
+		if (ObjectUtils.isEmpty(teamDtos)) {
+			responseEntity=new ResponseEntity<Object>(Collections.singletonMap("Message", "Record Not Found"),HttpStatus.NOT_FOUND);
+		} else {
+			responseEntity=new ResponseEntity<Object>(teamDtos,HttpStatus.FOUND);
+		}
+		return responseEntity;
+	}
+	
+	@GetMapping("/teams/{id}")
+	public ResponseEntity<Object> getTeamById(@PathVariable("id") long id)
+	{
+		ResponseEntity<Object> responseEntity;
+		Object response = teamService.findTeamById(id);
+		if (response instanceof String) {
+			responseEntity = new ResponseEntity<Object>(Collections.singletonMap("Message", response),HttpStatus.BAD_REQUEST);
+		} else {
+			responseEntity = new ResponseEntity<Object>(response,HttpStatus.FOUND);
+		}
+		return responseEntity;
+	}
+	
+	@DeleteMapping("/teams/{id}")
+	public ResponseEntity<Object> deleteTeamById(@PathVariable long id)
+	{
+		ResponseEntity<Object> responseEntity;
+		String response = teamService.deleteTeamById(id);
+		if (StringUtils.isBlank(response)) {
+			responseEntity = new ResponseEntity<Object>(Collections.singletonMap("Message", "Team Deleted Successfully"),HttpStatus.OK);
+		} else {
+			responseEntity = new ResponseEntity<Object>(Collections.singletonMap("Message", response),HttpStatus.BAD_REQUEST);
+		}
+		return responseEntity;
+	}
+	
+	@PutMapping("/teams/{id}")
+	public ResponseEntity<Object> updateTeamById(@PathVariable("id") long id, @RequestBody TeamDto teamDto)
+	{
+		ResponseEntity<Object> responseEntity;
+		String response = teamService.updateTeamById(id, teamDto);
+		if (StringUtils.isBlank(response)) {
+			responseEntity = new ResponseEntity<Object>(Collections.singletonMap("Message", "Team Updated Successfully"),HttpStatus.OK);
+		} else {
+			responseEntity = new ResponseEntity<Object>(Collections.singletonMap("Message", response),HttpStatus.BAD_REQUEST);
+		}
+		return responseEntity;
 	}
 }

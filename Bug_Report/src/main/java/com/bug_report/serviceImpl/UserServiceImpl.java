@@ -18,8 +18,10 @@ import com.bug_report.util.ValidateData;
 @Service
 public class UserServiceImpl implements UserService {
 	@Autowired
-	UserRepository userRepository;
-
+ 	private UserRepository userRepository;
+	@Autowired
+	private MapObject mapObject;
+	
 	@Override
 	public Object addUser(UserDto user) {
 		UserEntity userEntity = null;
@@ -81,7 +83,7 @@ public class UserServiceImpl implements UserService {
 		}
 		List<String> responseList = ValidateData.validateUser(userDto);
 		if (responseList.isEmpty()) {
-			UserEntity userEntity = (UserEntity) MapObject.mapObject(userDto, UserEntity.class);
+			UserEntity userEntity = (UserEntity) mapObject.mapObject(userDto, UserEntity.class);
 			existringUser.setFirstName(userEntity.getFirstName());
 			existringUser.setLastName(userEntity.getLastName());
 			existringUser.setUserRoleId(userEntity.getUserRoleId());
@@ -98,29 +100,33 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Object updateByEmpId(long empid, UserDto userDto) {
-		String messageString = null;
+		String messageString = StringUtils.EMPTY;
+		UserEntity existringUser;
+		List<String> responseList;
+		Object response;
+		UserEntity userEntity;
 
-		Object response = this.getUserByEmpId(empid);
+		response = this.getUserByEmpId(empid);
 		if (response instanceof String) {
 			messageString = "User not found enter valid empid...";
 		} else {
-			
-				UserEntity existringUser = userRepository.findById(empid).get();
-				List<String> responseList = ValidateData.validateUser(userDto);
-				if (responseList.isEmpty()) {
-					UserEntity userEntity = (UserEntity) MapObject.mapObject(userDto, UserEntity.class);
-					existringUser.setFirstName(userEntity.getFirstName());
-					existringUser.setLastName(userEntity.getLastName());
-					existringUser.setUserRoleId(userEntity.getUserRoleId());
-					existringUser.setEmail(userEntity.getEmail());
-					existringUser.setPassword(userEntity.getPassword());
-					existringUser.setDepartment(userEntity.getDepartment());
-					userRepository.save(existringUser);
 
-				} else {
-					return responseList;
-				}
-			
+			existringUser = userRepository.findById(empid).get();
+			responseList = ValidateData.validateUser(userDto);
+			if (responseList.isEmpty()) {
+				userEntity = (UserEntity) mapObject.mapObject(userDto, UserEntity.class);
+				existringUser.setFirstName(userEntity.getFirstName());
+				existringUser.setLastName(userEntity.getLastName());
+				existringUser.setUserRoleId(userEntity.getUserRoleId());
+				existringUser.setEmail(userEntity.getEmail());
+				existringUser.setPassword(userEntity.getPassword());
+				existringUser.setDepartment(userEntity.getDepartment());
+				userRepository.save(existringUser);
+
+			} else {
+				return responseList;
+			}
+
 		}
 
 		return messageString;
@@ -129,9 +135,10 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String deleteByEmpId(long empid) {
 		String messageString = null;
+		Object response;
 
 		try {
-			Object response = this.getUserByEmpId(empid);
+			response = this.getUserByEmpId(empid);
 			if (response instanceof String) {
 				messageString = (String) response;
 			} else {

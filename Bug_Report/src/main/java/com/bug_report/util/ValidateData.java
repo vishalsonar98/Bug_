@@ -10,9 +10,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
+import com.bug_report.dto.TeamDto;
 import com.bug_report.dto.UserDto;
 
+@Component
 public class ValidateData {
 	
 	public static List<String> validateUser(UserDto user)
@@ -71,5 +74,16 @@ public class ValidateData {
 			return "Data not present...";
 		}
 		return null;
+	}
+	
+	public String validateTeam(TeamDto teamDto)
+	{
+		String error;
+		if (!StringUtils.isBlank(teamDto.getTeamName())) {
+			error=null;
+		} else {
+			error="Enter valid Team Name";
+		}
+		return error;
 	}
 }
