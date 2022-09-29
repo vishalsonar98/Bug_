@@ -1,6 +1,6 @@
 package com.bug_report.entity;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,12 +13,13 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "employee")
+@Table(name = "employee",uniqueConstraints = { @UniqueConstraint(columnNames = { "email" }) })
 public class UserEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -38,8 +39,8 @@ public class UserEntity {
 	@JoinColumn(name="role_id")
 	private UserRoleEntity userRoleId;
 	
-	@ManyToMany
+	@ManyToMany()
 	@JoinTable(name = "team_assigned",joinColumns = {@JoinColumn(name="emp_id")},inverseJoinColumns = {@JoinColumn(name="team_id")})
-	private List<TeamEntity> team;
+	private Set<TeamEntity> team;
 	
 }

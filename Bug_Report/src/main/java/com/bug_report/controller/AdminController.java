@@ -20,9 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bug_report.dto.TeamDto;
 import com.bug_report.dto.UserDto;
 import com.bug_report.service.TeamService;
+import com.bug_report.service.UserAndTeamService;
 import com.bug_report.service.UserService;
-
-import lombok.Data;
 
 @RestController
 @RequestMapping("/admin")
@@ -31,6 +30,8 @@ public class AdminController<T> {
 	private UserService userService;
 	@Autowired
 	private TeamService teamService;
+	@Autowired
+	private UserAndTeamService userAndTeamService;
 	
 	@GetMapping("/")
 	public ResponseEntity<T> mapping()
@@ -177,6 +178,21 @@ public class AdminController<T> {
 			responseEntity = new ResponseEntity<Object>(Collections.singletonMap("Message", "Team Updated Successfully"),HttpStatus.OK);
 		} else {
 			responseEntity = new ResponseEntity<Object>(Collections.singletonMap("Message", response),HttpStatus.BAD_REQUEST);
+		}
+		return responseEntity;
+	}
+	
+	/****************************add user to team*********************************/
+	@PostMapping("/team/{tid}/user/{uid}")
+	public ResponseEntity<Object> addMemberInTeam(@PathVariable("tid") long teamId,@PathVariable("uid") long userId)
+	{
+		ResponseEntity<Object> responseEntity;
+		String responseString = userAndTeamService.addMemberToTeam(teamId, userId);
+		if (StringUtils.isBlank(responseString)) {
+			responseEntity = new ResponseEntity<Object>(Collections.singletonMap("Message", "Team member added Successfully"),HttpStatus.OK);
+		}
+		else {
+			responseEntity = new ResponseEntity<Object>(Collections.singletonMap("Message", responseString),HttpStatus.BAD_REQUEST);
 		}
 		return responseEntity;
 	}
