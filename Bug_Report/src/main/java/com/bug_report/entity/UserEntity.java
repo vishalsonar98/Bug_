@@ -42,5 +42,14 @@ public class UserEntity {
 	@ManyToMany()
 	@JoinTable(name = "team_assigned",joinColumns = {@JoinColumn(name="emp_id")},inverseJoinColumns = {@JoinColumn(name="team_id")})
 	private Set<TeamEntity> team;
+
+	@Override
+	public String toString() {
+		return "UserEntity [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", department="
+				+ department + ", email=" + email + ", password=" + password + ", userRoleId=" + userRoleId + ", team="
+				+ "]";
+	}
+	
+	
 	
 }

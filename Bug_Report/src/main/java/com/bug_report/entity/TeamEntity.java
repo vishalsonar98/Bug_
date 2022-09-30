@@ -28,4 +28,5 @@ public class TeamEntity {
 	@ManyToMany(mappedBy = "team")
 	private List<UserEntity> team_member;
 	
+	
 }

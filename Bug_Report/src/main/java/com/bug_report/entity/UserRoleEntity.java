@@ -22,4 +22,11 @@ public class UserRoleEntity {
 
 	@OneToMany(mappedBy = "userRoleId")
 	private List<UserEntity> user;
+
+	@Override
+	public String toString() {
+		return "UserRoleEntity [id=" + id + ", userType=" + userType + ", user=" + "]";
+	}
+	
+	
 }
