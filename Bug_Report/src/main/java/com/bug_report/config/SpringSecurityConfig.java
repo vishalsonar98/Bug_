@@ -23,42 +23,37 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	private CustomUserDetailService customUserDetailService;
 	@Autowired
 	private JwtAuthenticationFilter jwtAuthenticationFilter;
-	
+
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		
+
 		auth.userDetailsService(customUserDetailService);
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http
-			.csrf()
-			.disable()
-			.cors()
-			.disable()
-			.authorizeRequests()
-			.antMatchers("/token").permitAll()
-			.anyRequest().authenticated()
-			.and()
-			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		
+		http.csrf().disable().cors().disable().authorizeRequests().antMatchers("/admin/**").hasRole("ADMIN")
+				.antMatchers("/login1").permitAll().antMatchers("/**").permitAll().anyRequest().authenticated().and()
+				.formLogin().loginPage("/login")
+				.defaultSuccessUrl("/")
+				.and()
+				.sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
 		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-			
+
 	}
-	
+
 	@Bean
-	public PasswordEncoder passwordEncoder()
-	{
+	public PasswordEncoder passwordEncoder() {
 		return NoOpPasswordEncoder.getInstance();
 	}
-	
+
 	@Bean(name = BeanIds.AUTHENTICATION_MANAGER)
 	@Override
 	public AuthenticationManager authenticationManagerBean() throws Exception {
-		// TODO Auto-generated method stub
+
 		return super.authenticationManagerBean();
 	}
-	
-	
+
 }

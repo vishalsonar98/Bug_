@@ -5,11 +5,15 @@ import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bug_report.dto.UserDto;
+import com.bug_report.entity.TeamEntity;
 import com.bug_report.entity.UserEntity;
+import com.bug_report.repository.TeamRepository;
 import com.bug_report.repository.UserRepository;
 import com.bug_report.service.UserService;
 import com.bug_report.util.MapObject;
@@ -20,30 +24,36 @@ public class UserServiceImpl implements UserService {
 	@Autowired
  	private UserRepository userRepository;
 	@Autowired
+	private TeamRepository teamRepository;
+	@Autowired
 	private MapObject mapObject;
 	
+	
+	private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
 	@Override
 	public Object addUser(UserDto user) {
 		UserEntity userEntity = null;
+		Object responseObject;
 		if (!ObjectUtils.isEmpty(user)) {
 
 			List<String> errors = ValidateData.validateUser(user);
 			if (errors.isEmpty()) {
-				userEntity = MapObject.userDtoToUserEntity(user);
+				userEntity = mapObject.userDtoToUserEntity(user);
 				UserEntity existingUser;
 				existingUser = userRepository.findByEmail(userEntity.getEmail());
 				if (!ObjectUtils.isEmpty(existingUser)) {
 					return Arrays.asList("email already exist");
 				}
 				userRepository.save(userEntity);
-				return null;
+				responseObject = null;
 			} else {
-				return errors;
+				responseObject = errors;
 			}
 		} else {
-			System.out.println("Empty object");
+			responseObject = "Enter details of user properly...";
 		}
-		return Arrays.asList("error in saving data...");
+		return responseObject;
 	}
 
 	@Override
@@ -55,31 +65,35 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Object getUserByEmpId(long empId) {
-
-		if (StringUtils.isEmpty("" + empId)) {
-			return "Enter valid employee id";
-		}
+		Object responseObject;
 		UserEntity user = null;
-		;
-		try {
-			user = userRepository.findById(empId).get();
-
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			return "Record not found..";
-
+		if (StringUtils.isEmpty("" + empId)) {
+			responseObject = "Enter valid employee id";
 		}
-		return MapObject.userEntityToUserDto(user);
+		else {
+			try {
+				user = userRepository.findById(empId).get();
+				responseObject = MapObject.userEntityToUserDto(user);
+			} catch (Exception e) {
+				log.error(e.getMessage());
+				responseObject = "Record not found..";
+
+			}
+			
+		}
+		
+		return responseObject;
 	}
 
 	@Override
 	public Object updateByEmail(String email, UserDto userDto) {
+		Object responseObject;
 		if (StringUtils.isBlank(email)) {
-			return "Enter valid email...";
+			responseObject = "Enter valid email...";
 		}
 		UserEntity existringUser = userRepository.findByEmail(email);
 		if (ObjectUtils.isEmpty(existringUser)) {
-			return "User not found enter valid email...";
+			responseObject = "User not found enter valid email...";
 		}
 		List<String> responseList = ValidateData.validateUser(userDto);
 		if (responseList.isEmpty()) {
@@ -91,11 +105,11 @@ public class UserServiceImpl implements UserService {
 			existringUser.setPassword(userEntity.getPassword());
 			existringUser.setDepartment(userEntity.getDepartment());
 			userRepository.save(existringUser);
-			return null;
+			responseObject = null;
 		} else {
-			return responseList;
+			responseObject = responseList;
 		}
-
+		return responseObject;
 	}
 
 	@Override
@@ -142,11 +156,19 @@ public class UserServiceImpl implements UserService {
 			if (response instanceof String) {
 				messageString = (String) response;
 			} else {
+				UserEntity user = userRepository.findById(empid).get();
+				List<TeamEntity> teams = teamRepository.findAllByTeamMember(user);
+				teams.forEach(e->{
+					e.getTeamMember().remove(user);
+					user.getTeam().remove(e);
+					teamRepository.save(e);
+					userRepository.save(user);
+				});
 				userRepository.deleteById(empid);
 			}
 
 		} catch (Exception e) {
-			e.getMessage();
+			log.error(e.getMessage());
 		}
 
 		return messageString;

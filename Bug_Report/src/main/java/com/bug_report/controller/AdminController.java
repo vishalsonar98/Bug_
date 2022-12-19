@@ -5,11 +5,14 @@ import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bug_report.BugReportApplication;
 import com.bug_report.dto.TeamDto;
 import com.bug_report.dto.UserDto;
 import com.bug_report.service.TeamService;
@@ -32,6 +36,10 @@ public class AdminController<T> {
 	private TeamService teamService;
 	@Autowired
 	private UserAndTeamService userAndTeamService;
+	
+	
+	private static final Logger log = LoggerFactory.getLogger(BugReportApplication.class);
+
 	
 	@GetMapping("/")
 	public ResponseEntity<T> mapping()
@@ -49,7 +57,7 @@ public class AdminController<T> {
 		if (ObjectUtils.anyNull(object)) {
 			return new ResponseEntity<Object>("User created successfully",HttpStatus.CREATED);
 		} else {
-			return new ResponseEntity<Object>((List<String>)object,HttpStatus.FORBIDDEN);
+			return new ResponseEntity<>((List<String>)object,HttpStatus.FORBIDDEN);
 		}
 	}
 	
@@ -57,18 +65,23 @@ public class AdminController<T> {
 	public ResponseEntity<Object> getAllUsers()
 	{
 		List<UserDto> response=userService.getAllUser();
+		
 		if (response.isEmpty()) {
+			
 			return new ResponseEntity<Object>("Record not found...",HttpStatus.NOT_FOUND);
+			
 		}
 		else {
+			
 			return new ResponseEntity<Object>(response,HttpStatus.FOUND);
+			
 		}
 	}
 	
 	@GetMapping("/user/{empid}")
 	public ResponseEntity<Object> getEmployeeByEmpId(@PathVariable("empid") Long empId)
 	{
-		Object responseObject=userService.getUserByEmpId(empId);
+		Object responseObject = userService.getUserByEmpId(empId);
 		if (responseObject instanceof String) {
 			return new ResponseEntity<Object>(responseObject,HttpStatus.NOT_FOUND);
 		}
@@ -195,5 +208,47 @@ public class AdminController<T> {
 			responseEntity = new ResponseEntity<Object>(Collections.singletonMap("Message", responseString),HttpStatus.BAD_REQUEST);
 		}
 		return responseEntity;
+	}
+	
+	@GetMapping("/getTeams/{empid}")
+	public ResponseEntity<Object> getAllTeamsOfMember(@PathVariable("empid") long empid)
+	{
+		ResponseEntity<Object> responseEntity;
+		Object response = userAndTeamService.getTeamOfUser(empid);
+		if (response instanceof String) {
+			responseEntity = new ResponseEntity<Object>(response,HttpStatus.OK);
+		} else {
+			responseEntity = new ResponseEntity<Object>(response,HttpStatus.OK);
+		}
+		
+		 
+		return responseEntity;
+	}
+	
+	@PatchMapping("/team/{tid}/user/{uid}")
+	public ResponseEntity<?> removeMemberFromTeam(@PathVariable("tid") long teamid, @PathVariable("uid") long userId)
+	{
+		ResponseEntity<?> responseEntity;
+		String responseString = userAndTeamService.removeMemberFromTeam(teamid, userId);
+		if (StringUtils.isEmpty(responseString)) {
+			responseEntity = new ResponseEntity<Object>("Team data updated successfully...",HttpStatus.OK);
+		} else {
+			responseEntity = new ResponseEntity<Object>(responseString,HttpStatus.NOT_FOUND);
+		}
+		return responseEntity;
+	}
+	
+	@GetMapping("/test")
+	public String testingMeth()
+	{
+		return "testing page";
+	}
+	
+	
+	/*---------------------------------------------------------View apis--------------------------------------*/
+	@RequestMapping("/login")
+	public String login()
+	{
+		return "login";
 	}
 }

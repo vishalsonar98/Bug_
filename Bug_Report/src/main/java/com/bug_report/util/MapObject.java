@@ -15,7 +15,7 @@ import com.bug_report.entity.UserRoleEntity;
 @Component
 public class MapObject {
 
-	public static UserEntity userDtoToUserEntity(UserDto userDto) {
+	public  UserEntity userDtoToUserEntity(UserDto userDto) {
 		UserEntity user = new UserEntity();
 		user.setFirstName(userDto.getFirstName());
 		user.setLastName(userDto.getLastName());

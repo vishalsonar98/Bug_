@@ -2,6 +2,7 @@ package com.bug_report.entity;
 
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,6 +15,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
 
@@ -39,8 +42,10 @@ public class UserEntity {
 	@JoinColumn(name="role_id")
 	private UserRoleEntity userRoleId;
 	
-	@ManyToMany()
-	@JoinTable(name = "team_assigned",joinColumns = {@JoinColumn(name="emp_id")},inverseJoinColumns = {@JoinColumn(name="team_id")})
+	@ManyToMany(mappedBy = "teamMember",fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+//	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//	@JoinTable(name = "team_assigned",joinColumns = {@JoinColumn(name="emp_id")},inverseJoinColumns = {@JoinColumn(name="team_id")})
+//	@JsonManagedReference
 	private Set<TeamEntity> team;
 
 	@Override

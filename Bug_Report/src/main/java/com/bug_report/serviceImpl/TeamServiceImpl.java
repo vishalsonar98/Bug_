@@ -4,12 +4,15 @@ import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bug_report.dto.TeamDto;
 import com.bug_report.entity.TeamEntity;
 import com.bug_report.repository.TeamRepository;
+import com.bug_report.repository.UserRepository;
 import com.bug_report.service.TeamService;
 import com.bug_report.util.DateUtil;
 import com.bug_report.util.MapObject;
@@ -19,12 +22,17 @@ import com.bug_report.util.ValidateData;
 public class TeamServiceImpl implements TeamService {
 	@Autowired
 	private TeamRepository teamRepository;
+	@Autowired 
+	private UserRepository userRepository;
 	@Autowired
 	private ValidateData validateData;
 	@Autowired
 	private DateUtil dateUtil;
 	@Autowired
 	private MapObject mapObject;
+	
+	
+	private static final Logger log = LoggerFactory.getLogger(TeamServiceImpl.class);
 
 	@Override
 	public String addTeam(TeamDto teamDto) {
@@ -56,9 +64,11 @@ public class TeamServiceImpl implements TeamService {
 			response = "Enter valid team id";
 		} else {
 			Object existingTeam = this.findTeamById(id);
+			
 			if (existingTeam instanceof String) {
 				response = (String) existingTeam;
 			} else {
+				
 				teamRepository.deleteById(id);
 				response = null;
 			}
@@ -78,6 +88,8 @@ public class TeamServiceImpl implements TeamService {
 				teamEntity = teamRepository.findById(id).get();
 			} catch (Exception e) {
 				response = "Record not found, Enter valid team id";
+				log.error(e.getMessage());
+		
 			}
 			if (!ObjectUtils.isEmpty(teamEntity)) {
 				TeamDto teamDto = (TeamDto) mapObject.mapObject(teamEntity, TeamDto.class);
@@ -108,7 +120,7 @@ public class TeamServiceImpl implements TeamService {
 					try {
 						teamRepository.save(teamEntity);
 					} catch (Exception e) {
-						System.out.println(e.getMessage());
+						log.error(e.getMessage());
 					}
 					response=null;
 				}

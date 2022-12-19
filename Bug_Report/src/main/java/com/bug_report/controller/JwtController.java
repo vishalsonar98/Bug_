@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +38,8 @@ public class JwtController {
 		
 		UserDetails userDetails=this.customUserDetailService.loadUserByUsername(jwtUserDto.getUsername());
 		String token = jwtUtil.generateToken(userDetails); 
-		
+		System.out.println(new JwtResonse(token));
 		return ResponseEntity.ok(new JwtResonse(token));
 	}
+	
 }

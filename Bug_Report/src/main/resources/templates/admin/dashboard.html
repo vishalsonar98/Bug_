@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript" src="/wai/wai.js"></script>
+<title>Dashboard</title>
+<!-- Add a script below this line. -->
+</head>
+<body>
+	<h1>Welcome to dashboard</h1>
+	<span id="demo" value="hii" th:text="${token}"></span>
+	<span id="demo" value="hii" th:text="${token}"></span>
+	<script th:inline="javascript">
+	var token =/*[[${token}]]*/ "default";
+	console.log(token);
+	</script>
+</body>
+</html>

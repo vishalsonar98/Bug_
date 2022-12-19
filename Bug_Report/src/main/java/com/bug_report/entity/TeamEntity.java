@@ -4,11 +4,14 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
 
@@ -25,8 +28,8 @@ public class TeamEntity {
 	@Column(name = "creation_date")
 	private String creationDate;
 	
-	@ManyToMany(mappedBy = "team")
-	private List<UserEntity> team_member;
+	@ManyToMany()
+	private List<UserEntity> teamMember;
 	
 	
 }
